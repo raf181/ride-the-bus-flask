@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Round {{ game.current_round.value }} - Casino Ride the Bus</title>
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .casino-bg {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 50%, #1a202c 100%);
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+        }
+        .card-back {
+            background: linear-gradient(45deg, #1e40af, #3b82f6);
+            color: white;
+        }
+        .gold-text {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .pulsing {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+    </style>
+</head>
+<body class="casino-bg text-white min-h-screen">
+    
+    <!-- Header -->
+    <header class="bg-black bg-opacity-50 shadow-lg">
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold gold-text">🎰 CASINO RIDE THE BUS</h1>
+                <div class="flex items-center space-x-6">
+                    <div class="text-right">
+                        <div class="text-yellow-400 font-bold">Current Winnings: ${{ "%.2f"|format(game.current_winnings) }}</div>
+                        <div class="text-gray-300">Original Bet: ${{ "%.2f"|format(game.bet_amount) }}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-green-400 font-bold">Bankroll: ${{ "%.2f"|format(user.bankroll) }}</div>
+                        <div class="text-gray-300">Player: {{ user.username }}</div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="{{ url_for('profile') }}" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-sm">Profile</a>
+                        <a href="{{ url_for('new_game') }}" class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded text-sm">Exit</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+        
+        <!-- Game Status -->
+        <div class="text-center mb-8">
+            {% if game.status.value == 'active' %}
+            <h2 class="text-4xl font-bold gold-text mb-2">
+                Round {{ game.current_round.value }} of 4
+            </h2>
+            <p class="text-xl text-yellow-200">
+                {% if game.current_round.value == 1 %}Red or Black?{% endif %}
+                {% if game.current_round.value == 2 %}Higher or Lower?{% endif %}
+                {% if game.current_round.value == 3 %}Inside or Outside?{% endif %}
+                {% if game.current_round.value == 4 %}Pick the Suit{% endif %}
+            </p>
+            <p class="text-green-400 font-bold">
+                Potential Winnings: ${{ "%.2f"|format(game.potential_winnings) }}
+            </p>
+            {% elif game.status.value == 'won' %}
+            <h2 class="text-5xl font-bold text-green-400 pulsing">🎉 YOU WON! 🎉</h2>
+            <p class="text-2xl text-yellow-400">Final Winnings: ${{ "%.2f"|format(game.current_winnings) }}</p>
+            {% elif game.status.value == 'lost' %}
+            <h2 class="text-5xl font-bold text-red-400">💔 YOU LOST 💔</h2>
+            <p class="text-xl text-gray-400">Better luck next time!</p>
+            {% elif game.status.value == 'cashed_out' %}
+            <h2 class="text-4xl font-bold text-blue-400">💰 CASHED OUT! 💰</h2>
+            <p class="text-2xl text-yellow-400">Winnings: ${{ "%.2f"|format(game.current_winnings) }}</p>
+            {% endif %}
+        </div>
+        
+        <!-- Game Board -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Cards Section -->
+            <div class="lg:col-span-2">
+                
+                <!-- Current Cards -->
+                <div class="bg-gray-800 bg-opacity-80 rounded-lg p-6 mb-6">
+                    <h3 class="text-xl font-bold text-yellow-400 mb-4">Cards on Board</h3>
+                    <div class="flex justify-center space-x-4">
+                        {% for card in game.cards_drawn %}
+                        <div class="card w-24 h-32 flex flex-col items-center justify-center p-2 slide-in">
+                            <div class="text-2xl font-bold text-black">{{ card.rank.name[0] if card.rank.name != 'TEN' else '10' }}</div>
+                            <div class="text-3xl {% if card.color.value == 'red' %}text-red-500{% else %}text-black{% endif %}">
+                                {{ card.suit.value }}
+                            </div>
+                            <div class="text-xs text-gray-600 mt-1">{{ card.rank.value }}</div>
+                        </div>
+                        {% endfor %}
+                        
+                        <!-- Next card placeholder -->
+                        {% if game.status.value == 'active' %}
+                        <div class="card card-back w-24 h-32 flex items-center justify-center pulsing">
+                            <span class="text-2xl">?</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Guess Buttons -->
+                {% if game.status.value == 'active' %}
+                <div class="bg-gray-900 bg-opacity-80 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-yellow-400 mb-4">Make Your Guess</h3>
+                    
+                    {% if game.current_round.value == 1 %}
+                    <!-- Round 1: Red or Black -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="makeGuess('red')" class="bg-red-600 hover:bg-red-500 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            ❤️ RED
+                        </button>
+                        <button onclick="makeGuess('black')" class="bg-gray-800 hover:bg-gray-700 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            ♠️ BLACK
+                        </button>
+                    </div>
+                    
+                    {% elif game.current_round.value == 2 %}
+                    <!-- Round 2: Higher or Lower -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="makeGuess('higher')" class="bg-green-600 hover:bg-green-500 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            ⬆️ HIGHER
+                        </button>
+                        <button onclick="makeGuess('lower')" class="bg-blue-600 hover:bg-blue-500 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            ⬇️ LOWER
+                        </button>
+                    </div>
+                    <p class="text-center text-gray-400 mt-2">
+                        First card value: {{ game.cards_drawn[0].rank.value }}
+                    </p>
+                    
+                    {% elif game.current_round.value == 3 %}
+                    <!-- Round 3: Inside or Outside -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <button onclick="makeGuess('inside')" class="bg-purple-600 hover:bg-purple-500 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            📍 INSIDE
+                        </button>
+                        <button onclick="makeGuess('outside')" class="bg-orange-600 hover:bg-orange-500 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            🌐 OUTSIDE
+                        </button>
+                    </div>
+                    <p class="text-center text-gray-400 mt-2">
+                        Range: {{ [game.cards_drawn[0].rank.value, game.cards_drawn[1].rank.value]|min }} - {{ [game.cards_drawn[0].rank.value, game.cards_drawn[1].rank.value]|max }}
+                    </p>
+                    
+                    {% elif game.current_round.value == 4 %}
+                    <!-- Round 4: Pick Suit -->
+                    {% set used_suits = game.cards_drawn[:3]|map(attribute='suit.name')|map('lower')|list %}
+                    <div class="grid grid-cols-2 gap-4">
+                        {% if 'hearts' not in used_suits %}
+                        <button onclick="makeGuess('hearts')" class="bg-red-600 hover:bg-red-500 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            ♥️ HEARTS
+                        </button>
+                        {% endif %}
+                        {% if 'diamonds' not in used_suits %}
+                        <button onclick="makeGuess('diamonds')" class="bg-red-600 hover:bg-red-500 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            ♦️ DIAMONDS
+                        </button>
+                        {% endif %}
+                        {% if 'clubs' not in used_suits %}
+                        <button onclick="makeGuess('clubs')" class="bg-gray-800 hover:bg-gray-700 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            ♣️ CLUBS
+                        </button>
+                        {% endif %}
+                        {% if 'spades' not in used_suits %}
+                        <button onclick="makeGuess('spades')" class="bg-gray-800 hover:bg-gray-700 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
+                            ♠️ SPADES
+                        </button>
+                        {% endif %}
+                    </div>
+                    <p class="text-center text-gray-400 mt-2">
+                        Used suits: 
+                        {% for card in game.cards_drawn[:3] %}
+                        {{ card.suit.value }}
+                        {% endfor %}
+                    </p>
+                    {% endif %}
+                    
+                    <!-- Cash Out Button -->
+                    {% if game.current_round.value > 1 %}
+                    <div class="mt-6 text-center">
+                        <button onclick="cashOut()" class="bg-yellow-600 hover:bg-yellow-500 text-black py-3 px-8 rounded-lg font-bold text-lg transition">
+                            💰 CASH OUT (${{ "%.2f"|format(game.current_winnings) }})
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <!-- Game Over Actions -->
+                {% if game.status.value != 'active' %}
+                <div class="bg-gray-900 bg-opacity-80 rounded-lg p-6 text-center">
+                    <form action="/new_game" method="POST" class="space-y-4">
+                        <button type="submit" class="bg-gradient-to-r from-yellow-500 to-yellow-600 text-black py-4 px-8 rounded-lg font-bold text-xl hover:from-yellow-400 hover:to-yellow-500 transition">
+                            🎰 PLAY AGAIN 🎰
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+                
+            </div>
+            
+            <!-- Strategy Panel -->
+            <div class="space-y-6">
+                
+                <!-- Strategy Recommendation -->
+                <div class="bg-green-800 bg-opacity-80 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-green-400 mb-4">🧠 Strategy Advisor</h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Recommendation:</span>
+                            <span class="font-bold text-green-400">{{ strategy.action.replace('_', ' ').title() }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Confidence:</span>
+                            <span class="font-bold text-yellow-400">{{ "%.0f"|format(strategy.confidence * 100) }}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Win Probability:</span>
+                            <span class="font-bold text-blue-400">{{ "%.1f"|format(strategy.probability * 100) }}%</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-300">Expected Value:</span>
+                            <span class="font-bold text-purple-400">${{ "%.2f"|format(strategy.expected_value) }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-green-900 bg-opacity-50 rounded">
+                        <p class="text-sm text-green-200">{{ strategy.reasoning }}</p>
+                    </div>
+                </div>
+                
+                <!-- Game Progress -->
+                <div class="bg-gray-800 bg-opacity-80 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-yellow-400 mb-4">🎯 Progress</h3>
+                    
+                    <div class="space-y-3">
+                        {% for i in range(1, 5) %}
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold
+                                        {% if i < game.current_round.value %}bg-green-500{% elif i == game.current_round.value and game.status.value == 'active' %}bg-yellow-500{% else %}bg-gray-600{% endif %}">
+                                {{ i }}
+                            </div>
+                            <span class="{% if i < game.current_round.value %}text-green-400{% elif i == game.current_round.value and game.status.value == 'active' %}text-yellow-400{% else %}text-gray-400{% endif %}">
+                                Round {{ i }}
+                                {% if i == 1 %}(2x){% elif i == 2 %}(2x){% elif i == 3 %}(3x){% elif i == 4 %}(4x){% endif %}
+                            </span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <!-- Game History -->
+                {% if game.game_history %}
+                <div class="bg-gray-800 bg-opacity-80 rounded-lg p-6">
+                    <h3 class="text-xl font-bold text-blue-400 mb-4">📊 Game Log</h3>
+                    
+                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                        {% for entry in game.game_history %}
+                        <div class="text-sm p-2 bg-gray-700 bg-opacity-50 rounded">
+                            <div class="flex justify-between items-center">
+                                <span>R{{ entry.round }}: {{ entry.guess.title() }}</span>
+                                <span class="{% if entry.correct %}text-green-400{% else %}text-red-400{% endif %}">
+                                    {{ entry.card }}
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-400">
+                                {% if entry.correct %}✅ Won{% else %}❌ Lost{% endif %} 
+                                - ${{ "%.2f"|format(entry.winnings) }}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        async function makeGuess(guess) {
+            // Disable all buttons
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => btn.disabled = true);
+            
+            try {
+                const response = await fetch('/make_guess', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ guess: guess })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show result
+                    const resultMessage = data.correct ? 
+                        `🎉 Correct! Drew ${data.card_rank} of ${data.card_suit}` : 
+                        `💔 Wrong! Drew ${data.card_rank} of ${data.card_suit}`;
+                    
+                    alert(resultMessage);
+                    
+                    // Reload page to show updated state
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                    buttons.forEach(btn => btn.disabled = false);
+                }
+            } catch (error) {
+                alert('Network error: ' + error.message);
+                buttons.forEach(btn => btn.disabled = false);
+            }
+        }
+        
+        async function cashOut() {
+            if (!confirm('Are you sure you want to cash out?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/cash_out', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`💰 Cashed out $${data.winnings.toFixed(2)}!`);
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                alert('Network error: ' + error.message);
+            }
+        }
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            if ({{ game.status.value == 'active' }}|lower) {
+                {% if game.current_round.value == 1 %}
+                if (e.key === '1' || e.key.toLowerCase() === 'r') makeGuess('red');
+                if (e.key === '2' || e.key.toLowerCase() === 'b') makeGuess('black');
+                {% elif game.current_round.value == 2 %}
+                if (e.key === '1' || e.key.toLowerCase() === 'h') makeGuess('higher');
+                if (e.key === '2' || e.key.toLowerCase() === 'l') makeGuess('lower');
+                {% elif game.current_round.value == 3 %}
+                if (e.key === '1' || e.key.toLowerCase() === 'i') makeGuess('inside');
+                if (e.key === '2' || e.key.toLowerCase() === 'o') makeGuess('outside');
+                {% endif %}
+                
+                if (e.key.toLowerCase() === 'c' && {{ game.current_round.value > 1 }}) cashOut();
+            }
+        });
+    </script>
+</body>
+</html>

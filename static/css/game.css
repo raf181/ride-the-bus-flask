@@ -1,0 +1,164 @@
+/* Custom styles for Ride the Bus card game */
+
+/* Card styling */
+.card, .card-back, .pyramid-card, .bus-card {
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card:hover, .pyramid-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+/* Pyramid layout */
+.pyramid-container {
+    perspective: 1000px;
+}
+
+.pyramid-row {
+    animation: slideInDown 0.5s ease-out;
+}
+
+/* Card flip animation */
+@keyframes cardFlip {
+    0% { transform: rotateY(0deg); }
+    50% { transform: rotateY(90deg); }
+    100% { transform: rotateY(0deg); }
+}
+
+.card-flip {
+    animation: cardFlip 0.6s ease-in-out;
+}
+
+/* Colorblind-friendly suits */
+.suit-hearts, .suit-diamonds {
+    color: #dc2626; /* red-600 */
+}
+
+.suit-clubs, .suit-spades {
+    color: #1f2937; /* gray-800 */
+}
+
+/* Player turn indicator */
+.current-player {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { 
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% { 
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
+}
+
+/* Button animations */
+.guess-btn {
+    transition: all 0.2s ease;
+    transform: scale(1);
+}
+
+.guess-btn:hover:not(:disabled) {
+    transform: scale(1.05);
+}
+
+.guess-btn:active {
+    transform: scale(0.95);
+}
+
+.guess-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: scale(1);
+}
+
+/* Game log animations */
+.log-entry {
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .card, .card-back, .pyramid-card, .bus-card {
+        width: 3rem; /* 12 * 0.25rem = 3rem */
+        height: 4rem; /* 16 * 0.25rem = 4rem */
+        font-size: 0.75rem;
+    }
+    
+    .pyramid-row {
+        gap: 0.25rem;
+    }
+    
+    .bus-line {
+        gap: 0.25rem;
+        flex-wrap: wrap;
+    }
+}
+
+/* Accessibility improvements */
+.card:focus, .guess-btn:focus {
+    outline: 2px solid #fbbf24; /* yellow-400 */
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card, .card-back {
+        border: 2px solid #000;
+    }
+    
+    .suit-hearts, .suit-diamonds {
+        color: #000;
+        background-color: #dc2626;
+        padding: 2px;
+        border-radius: 2px;
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Print styles */
+@media print {
+    .guess-btn, #assignment-modal, #rules-modal, #settings-modal {
+        display: none !important;
+    }
+    
+    .card, .pyramid-card, .bus-card {
+        border: 1px solid #000 !important;
+        background: white !important;
+        color: black !important;
+    }
+}

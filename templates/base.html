@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ride the Bus{% endblock %}</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="Ride the Bus card game - A fun drinking/party game for 2-10 players">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon-192.png') }}">
+    
+    <!-- CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body class="bg-green-900 text-white min-h-screen">
+    <!-- Header -->
+    <header class="bg-green-800 shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold flex items-center">
+                    🃏 <span class="ml-2">Ride the Bus</span>
+                </h1>
+                <nav class="space-x-4">
+                    <a href="{{ url_for('landing') }}" class="hover:text-green-300">Home</a>
+                    <button id="rules-btn" class="hover:text-green-300">Rules</button>
+                    <button id="settings-btn" class="hover:text-green-300">Settings</button>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6 flex-1">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Rules Modal -->
+    <div id="rules-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white text-black rounded-lg max-w-4xl max-h-[90vh] overflow-y-auto p-6 m-4">
+            <div class="flex justify-between items-start mb-4">
+                <h2 class="text-2xl font-bold">How to Play Ride the Bus</h2>
+                <button id="close-rules" class="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            
+            <div class="space-y-6">
+                <section>
+                    <h3 class="text-lg font-semibold text-blue-600 mb-2">Overview</h3>
+                    <p>Ride the Bus is a card game for 2-10 players with three phases. Players make guesses about cards and face penalties for wrong answers.</p>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-blue-600 mb-2">Phase One: The Deal (R1-R4)</h3>
+                    <div class="space-y-2">
+                        <div><strong>R1:</strong> Guess "Red or Black" - penalty: {{ config.penalty.sips_wrong_guess_r1 if config else 1 }} {{ 'sip' if config and config.alcohol_mode.enabled else 'point' }}</div>
+                        <div><strong>R2:</strong> Guess "Higher or Lower" than your first card - penalty: {{ config.penalty.sips_wrong_guess_r2 if config else 1 }} {{ 'sip' if config and config.alcohol_mode.enabled else 'point' }}</div>
+                        <div><strong>R3:</strong> Guess "Inside or Outside" the range of your first two cards - penalty: {{ config.penalty.sips_wrong_guess_r3 if config else 1 }} {{ 'sip' if config and config.alcohol_mode.enabled else 'point' }}</div>
+                        <div><strong>R4:</strong> Guess the suit - penalty: {{ config.penalty.sips_wrong_guess_r4 if config else 1 }} {{ 'sip' if config and config.alcohol_mode.enabled else 'point' }}, reward: {{ config.reward.reward_distribute_drinks if config else 5 }} {{ 'sips' if config and config.alcohol_mode.enabled else 'points' }} to assign</div>
+                    </div>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-blue-600 mb-2">Phase Two: The Pyramid</h3>
+                    <p>Cards are laid in a pyramid (5-4-3-2-1). Cards are flipped one by one, bottom to top. Players with matching ranks can play a card to assign drinks equal to the row value (1-5).</p>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-blue-600 mb-2">Phase Three: Ride the Bus</h3>
+                    <p>The player with the most cards left "rides the bus." 10 cards are flipped. Face cards and Aces give the rider drinks: J=1, Q=2, K=3, A=4.</p>
+                </section>
+                
+                <section>
+                    <h3 class="text-lg font-semibold text-blue-600 mb-2">Special Rules</h3>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Equal cards in R2/R3 trigger a reshuffle</li>
+                        <li>Ties for bus rider are broken by highest remaining card</li>
+                        <li>Ace is high in all comparisons</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white text-black rounded-lg max-w-md p-6 m-4">
+            <div class="flex justify-between items-start mb-4">
+                <h2 class="text-xl font-bold">Settings</h2>
+                <button id="close-settings" class="text-gray-500 hover:text-gray-700">✕</button>
+            </div>
+            
+            <div class="space-y-4">
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="alcohol-mode" {% if config and config.alcohol_mode.enabled %}checked{% endif %}>
+                    <span>Alcohol Mode (sips vs points)</span>
+                </label>
+                
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="sound-effects" checked>
+                    <span>Sound Effects</span>
+                </label>
+                
+                <label class="flex items-center space-x-2">
+                    <input type="checkbox" id="animations" checked>
+                    <span>Card Animations</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-green-800 text-center py-4 text-sm">
+        <p>Ride the Bus Card Game &copy; 2025 | Play Responsibly</p>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+    
+    <script>
+        // Modal handlers
+        document.getElementById('rules-btn').addEventListener('click', () => {
+            document.getElementById('rules-modal').classList.remove('hidden');
+        });
+        
+        document.getElementById('close-rules').addEventListener('click', () => {
+            document.getElementById('rules-modal').classList.add('hidden');
+        });
+        
+        document.getElementById('settings-btn').addEventListener('click', () => {
+            document.getElementById('settings-modal').classList.remove('hidden');
+        });
+        
+        document.getElementById('close-settings').addEventListener('click', () => {
+            document.getElementById('settings-modal').classList.add('hidden');
+        });
+        
+        // Close modals on outside click
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'rules-modal') {
+                document.getElementById('rules-modal').classList.add('hidden');
+            }
+            if (e.target.id === 'settings-modal') {
+                document.getElementById('settings-modal').classList.add('hidden');
+            }
+        });
+    </script>
+    
+    {% block scripts %}{% endblock %}
+</body>
+</html>

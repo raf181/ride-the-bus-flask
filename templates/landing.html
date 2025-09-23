@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Ride the Bus - Welcome{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto text-center">
+    <!-- Hero Section -->
+    <div class="mb-12">
+        <h1 class="text-6xl font-bold mb-4 text-yellow-300">🃏 Ride the Bus</h1>
+        <p class="text-xl mb-8 text-green-200">The classic drinking card game for 2-10 players</p>
+        
+        <!-- Game modes buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+            <div class="bg-green-800 rounded-lg p-6 hover:bg-green-700 transition">
+                <h3 class="text-xl font-semibold mb-2">🏠 Local Game</h3>
+                <p class="mb-4 text-green-200">Pass-and-play on one device</p>
+                <a href="{{ url_for('create_room') }}" class="bg-yellow-500 text-black px-6 py-3 rounded-lg font-semibold hover:bg-yellow-400 transition">
+                    Start Local Game
+                </a>
+            </div>
+            
+            <div class="bg-green-800 rounded-lg p-6 hover:bg-green-700 transition">
+                <h3 class="text-xl font-semibold mb-2">🌐 Online Room</h3>
+                <p class="mb-4 text-green-200">Play with friends remotely</p>
+                <div class="space-y-2">
+                    <a href="{{ url_for('create_room') }}" class="block bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-400 transition">
+                        Create Room
+                    </a>
+                    <a href="{{ url_for('join_room_route') }}" class="block bg-purple-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-purple-400 transition">
+                        Join Room
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Rules -->
+    <div class="bg-green-800 rounded-lg p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">Quick Rules</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+            <div>
+                <h3 class="font-semibold text-yellow-300 mb-2">Phase 1: The Deal</h3>
+                <ul class="text-sm space-y-1 text-green-200">
+                    <li>• R1: Red or Black?</li>
+                    <li>• R2: Higher or Lower?</li>
+                    <li>• R3: Inside or Outside?</li>
+                    <li>• R4: Pick a Suit</li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-semibold text-yellow-300 mb-2">Phase 2: Pyramid</h3>
+                <ul class="text-sm space-y-1 text-green-200">
+                    <li>• Cards in 5-4-3-2-1 pyramid</li>
+                    <li>• Match ranks to assign drinks</li>
+                    <li>• Row value = drinks assigned</li>
+                </ul>
+            </div>
+            <div>
+                <h3 class="font-semibold text-yellow-300 mb-2">Phase 3: The Bus</h3>
+                <ul class="text-sm space-y-1 text-green-200">
+                    <li>• Most cards rides the bus</li>
+                    <li>• Face cards = drinks</li>
+                    <li>• J=1, Q=2, K=3, A=4</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Features -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div class="bg-green-800 rounded-lg p-4 text-center">
+            <div class="text-2xl mb-2">🎯</div>
+            <h3 class="font-semibold">Accurate Rules</h3>
+            <p class="text-sm text-green-200">Faithful implementation of classic rules</p>
+        </div>
+        <div class="bg-green-800 rounded-lg p-4 text-center">
+            <div class="text-2xl mb-2">🔄</div>
+            <h3 class="font-semibold">Reproducible</h3>
+            <p class="text-sm text-green-200">Seeded RNG for consistent games</p>
+        </div>
+        <div class="bg-green-800 rounded-lg p-4 text-center">
+            <div class="text-2xl mb-2">⚙️</div>
+            <h3 class="font-semibold">Configurable</h3>
+            <p class="text-sm text-green-200">Adjust penalties and house rules</p>
+        </div>
+        <div class="bg-green-800 rounded-lg p-4 text-center">
+            <div class="text-2xl mb-2">♿</div>
+            <h3 class="font-semibold">Accessible</h3>
+            <p class="text-sm text-green-200">Screen reader and keyboard friendly</p>
+        </div>
+    </div>
+    
+    <!-- Disclaimer -->
+    <div class="bg-yellow-900 border border-yellow-600 rounded-lg p-4 text-yellow-100">
+        <h3 class="font-semibold mb-2">⚠️ Play Responsibly</h3>
+        <p class="text-sm">
+            This game includes drinking elements. Use non-alcoholic mode for minors. 
+            Know your limits and never drink and drive.
+        </p>
+    </div>
+</div>
+{% endblock %}

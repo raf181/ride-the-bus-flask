@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Casino Ride the Bus</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            color: white;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #ffd700;
+            font-size: 2.2em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #1e3c72;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #ffd700;
+            border: 2px solid #ffd700;
+        }
+
+        .btn-secondary:hover {
+            background: #ffd700;
+            color: #1e3c72;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h2 {
+            color: #ffd700;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .user-info {
+            display: grid;
+            gap: 15px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-item:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #ccc;
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: white;
+            font-weight: 600;
+        }
+
+        .bankroll {
+            color: #ffd700;
+            font-size: 1.3em;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            display: block;
+            color: #ffd700;
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .game-history {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .game-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .game-item:last-child {
+            border-bottom: none;
+        }
+
+        .game-date {
+            color: #ccc;
+            font-size: 0.9em;
+        }
+
+        .game-result {
+            font-weight: 600;
+        }
+
+        .profit {
+            color: #6bcf7f;
+        }
+
+        .loss {
+            color: #ff6b6b;
+        }
+
+        .leaderboard {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .rank {
+            color: #ffd700;
+            font-weight: 700;
+            margin-right: 10px;
+        }
+
+        .username {
+            flex-grow: 1;
+            color: white;
+        }
+
+        .earnings {
+            color: #6bcf7f;
+            font-weight: 600;
+        }
+
+        .current-user {
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin: -8px -12px;
+        }
+
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+
+        .flash-message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .flash-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.5);
+            color: #66d9aa;
+        }
+
+        .casino-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 60%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="casino-bg"></div>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="header">
+        <h1>🎰 Player Profile</h1>
+        <div class="header-controls">
+            <a href="{{ url_for('landing') }}" class="btn btn-primary">Play Game</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">Logout</a>
+        </div>
+    </div>
+
+    <div class="profile-grid">
+        <!-- User Information -->
+        <div class="card">
+            <h2>📊 Account Details</h2>
+            <div class="user-info">
+                <div class="info-item">
+                    <span class="info-label">Username:</span>
+                    <span class="info-value">{{ user.username }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value">{{ user.email }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Member Since:</span>
+                    <span class="info-value">{{ user.created_at.strftime('%B %d, %Y') }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Current Bankroll:</span>
+                    <span class="info-value bankroll">${{ "%.2f"|format(user.bankroll) }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Last Login:</span>
+                    <span class="info-value">{{ user.last_login.strftime('%m/%d/%Y %I:%M %p') if user.last_login else 'Never' }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="card">
+            <h2>📈 Gaming Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.total_games }}</span>
+                    <span class="stat-label">Games Played</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ stats.games_won }}</span>
+                    <span class="stat-label">Games Won</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ "%.1f"|format(stats.win_rate * 100) }}%</span>
+                    <span class="stat-label">Win Rate</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${{ "%.2f"|format(stats.total_bet) }}</span>
+                    <span class="stat-label">Total Bet</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">${{ "%.2f"|format(stats.total_winnings) }}</span>
+                    <span class="stat-label">Total Winnings</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value {{ 'profit' if stats.net_profit >= 0 else 'loss' }}">${{ "%.2f"|format(stats.net_profit) }}</span>
+                    <span class="stat-label">Net Profit</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="profile-grid">
+        <!-- Recent Games -->
+        <div class="card">
+            <h2>🎯 Recent Games</h2>
+            <div class="game-history">
+                {% if recent_games %}
+                    {% for game in recent_games %}
+                        <div class="game-item">
+                            <div>
+                                <div class="game-date">{{ game.created_at.strftime('%m/%d/%Y %I:%M %p') }}</div>
+                                <div>Bet: ${{ "%.2f"|format(game.bet_amount) }} | Rounds: {{ game.rounds_completed }}</div>
+                            </div>
+                            <div class="game-result {{ 'profit' if game.profit_loss >= 0 else 'loss' }}">
+                                ${{ "%.2f"|format(game.profit_loss) }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; color: #ccc; margin-top: 20px;">No games played yet!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Leaderboard -->
+        <div class="card">
+            <h2>🏆 Leaderboard</h2>
+            <div class="leaderboard">
+                {% if leaderboard %}
+                    {% for i, player in enumerate(leaderboard, 1) %}
+                        <div class="leaderboard-item {% if player.id == user.id %}current-user{% endif %}">
+                            <span class="rank">#{{ i }}</span>
+                            <span class="username">{{ player.username }}</span>
+                            <span class="earnings">${{ "%.2f"|format(player.bankroll) }}</span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="text-align: center; color: #ccc; margin-top: 20px;">No players yet!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add some interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                    this.style.boxShadow = '0 15px 30px rgba(0, 0, 0, 0.3)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.2)';
+                });
+            });
+
+            // Auto-refresh every 30 seconds to update data
+            setTimeout(() => {
+                window.location.reload();
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
