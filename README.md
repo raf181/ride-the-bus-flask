@@ -5,12 +5,14 @@ A faithful implementation of the classic drinking card game "Ride the Bus" built
 ## 🎯 Features
 
 ### Core Gameplay
+
 - **Complete Rule Implementation**: All three phases (Deal, Pyramid, Bus) with exact rule enforcement
 - **Seeded RNG**: Reproducible games using deterministic random number generation
 - **2-10 Players**: Support for local pass-and-play and online multiplayer rooms
 - **Configurable Settings**: Alcohol/points mode, customizable penalties and rewards
 
 ### Technical Features
+
 - **Progressive Web App**: Installable, offline-capable web application
 - **Real-time Multiplayer**: WebSocket-based rooms for online play
 - **Accessibility**: Keyboard navigation, screen reader support, colorblind-friendly design
@@ -20,6 +22,7 @@ A faithful implementation of the classic drinking card game "Ride the Bus" built
 ## 🃏 Game Rules
 
 ### Phase 1: The Deal (R1-R4)
+
 Each player gets 4 cards through a series of guesses:
 
 - **R1 - Red or Black?**: Guess the color of your first card
@@ -30,10 +33,13 @@ Each player gets 4 cards through a series of guesses:
 Wrong guesses result in drinking penalties. Equal cards in R2/R3 trigger reshuffling.
 
 ### Phase 2: The Pyramid
+
 Cards arranged in a 5-4-3-2-1 pyramid. Players can match revealed cards with cards from their hand to assign drinks equal to the row value (1-5 drinks).
 
 ### Phase 3: Ride the Bus
+
 Player with most remaining cards "rides the bus." Face cards and Aces in a 10-card sequence give drinks to the rider:
+
 - Jack = 1 drink
 - Queen = 2 drinks  
 - King = 3 drinks
@@ -42,12 +48,14 @@ Player with most remaining cards "rides the bus." Face cards and Aces in a 10-ca
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.8+
 - Modern web browser
 
 ### Installation
 
 1. **Clone and setup**:
+
 ```bash
 git clone <repo-url>
 cd ride-the-bus-flask
@@ -55,6 +63,7 @@ python -m venv venv
 ```
 
 2. **Activate virtual environment**:
+
 ```bash
 # Windows
 venv\Scripts\activate
@@ -64,16 +73,19 @@ source venv/bin/activate
 ```
 
 3. **Install dependencies**:
+
 ```bash
 pip install flask flask-socketio
 ```
 
 4. **Run the application**:
+
 ```bash
 python app.py
 ```
 
 5. **Open in browser**:
+
 ```
 http://localhost:5000
 ```
@@ -81,6 +93,7 @@ http://localhost:5000
 ## 🎮 How to Play
 
 ### Local Game (Pass-and-Play)
+
 1. Visit the landing page
 2. Click "Start Local Game"
 3. Add player names in the lobby
@@ -88,12 +101,14 @@ http://localhost:5000
 5. Pass device between players for their turns
 
 ### Online Multiplayer
+
 1. Host creates a room and shares the room code
 2. Players join using the room code
 3. Host starts the game when all players are ready
 4. Each player uses their own device
 
 ### Game Configuration
+
 - **Alcohol Mode**: Toggle between drinking (sips) and family-friendly (points) mode
 - **Game Seed**: Enter a number for reproducible games
 - **House Rules**: Enable/disable multiple matches per pyramid flip
@@ -101,6 +116,7 @@ http://localhost:5000
 ## 🔧 Development
 
 ### Project Structure
+
 ```
 ride-the-bus-flask/
 ├── app.py                 # Flask application and routes
@@ -121,11 +137,13 @@ ride-the-bus-flask/
 ### Testing
 
 Run the test suite to verify game rules:
+
 ```bash
 python tests/test_engine.py
 ```
 
 The tests cover all acceptance criteria from the specification:
+
 - ✅ R1 color guess mechanics
 - ✅ R2 higher/lower with reshuffle rule
 - ✅ R3 inside/outside logic
@@ -171,6 +189,7 @@ game2 = GameEngine(seed=42).create_game(['Alice', 'Bob'], seed=42)
 ## 🌐 API Reference
 
 ### HTTP Endpoints
+
 - `GET /` - Landing page
 - `GET /create_room` - Create new game room
 - `POST /join_room` - Join existing room
@@ -180,6 +199,7 @@ game2 = GameEngine(seed=42).create_game(['Alice', 'Bob'], seed=42)
 - `POST /api/make_guess/<game_id>` - Make guess in current round
 
 ### WebSocket Events
+
 - `connect` / `disconnect` - Connection management
 - `join_lobby` - Player joins lobby with name
 - `player_ready` - Toggle ready status
@@ -235,6 +255,7 @@ This project is for educational purposes. Please play responsibly and follow loc
 This implementation meets all requirements from the original specification:
 
 ### ✅ Core Requirements
+
 - [x] Full gameplay implementation (3 phases)
 - [x] 2-10 player support
 - [x] Local and online multiplayer
@@ -244,6 +265,7 @@ This implementation meets all requirements from the original specification:
 - [x] Always-visible state log
 
 ### ✅ Technical Requirements
+
 - [x] Seeded PRNG for reproducibility
 - [x] Standard 52-card deck (Ace high)
 - [x] Reshuffle rule implementation
@@ -254,6 +276,7 @@ This implementation meets all requirements from the original specification:
 - [x] PWA with offline cache
 
 ### ✅ All Acceptance Tests Pass
+
 - [x] R1: Color guess mechanics
 - [x] R2: Higher/lower with equal reshuffle
 - [x] R3: Inside/outside logic

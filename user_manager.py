@@ -376,8 +376,8 @@ class UserManager:
         except Exception:
             return {}
     
-    def claim_daily_bonus(self, user_id: int) -> tuple[bool, float, str]:
-        """Claim daily login bonus"""
+    def claim_daily_bonus(self, user_id: int) -> float:
+        """Simplified daily bonus for app.py compatibility"""
         try:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
@@ -390,7 +390,7 @@ class UserManager:
             """, (user_id, today))
             
             if cursor.fetchone():
-                return False, 0, "Daily bonus already claimed"
+                return 0  # Already claimed
             
             # Calculate bonus (base $50 + random $0-50)
             import random
@@ -410,10 +410,10 @@ class UserManager:
             conn.commit()
             conn.close()
             
-            return True, bonus_amount, "Daily bonus claimed!"
+            return bonus_amount
             
-        except Exception as e:
-            return False, 0, f"Error claiming bonus: {str(e)}"
+        except Exception:
+            return 0
     
     def add_funds(self, user_id: int, amount: float) -> bool:
         """Add funds to user's bankroll (for testing/admin purposes)"""
@@ -462,6 +462,121 @@ class UserManager:
             
             conn.close()
             return leaderboard
+            
+        except Exception:
+            return []
+    
+    # Alias methods for compatibility with app.py
+    def create_user(self, username: str, email: str, password: str, starting_bankroll: float = 1000.0) -> tuple[bool, str]:
+        """Alias for register_user"""
+        return self.register_user(username, email, password, starting_bankroll)
+    
+    def authenticate_user(self, username: str, password: str) -> bool:
+        """Authenticate user and return True/False"""
+        user, message = self.login_user(username, password)
+        return user is not None
+    
+    def get_user_by_username(self, username: str) -> Optional[Dict]:
+        """Get user by username, returning dict format"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT id, username, email, bankroll, total_wagered, total_won, 
+                       games_played, games_won, created_at, last_login
+                FROM users WHERE username = ?
+            """, (username,))
+            
+            row = cursor.fetchone()
+            if not row:
+                return None
+            
+            conn.close()
+            return {
+                'id': row[0],
+                'username': row[1],
+                'email': row[2],
+                'bankroll': row[3],
+                'total_wagered': row[4],
+                'total_won': row[5],
+                'games_played': row[6],
+                'games_won': row[7],
+                'created_at': row[8],
+                'last_login': row[9]
+            }
+            
+        except Exception:
+            return None
+    
+    def get_user_by_id(self, user_id: int) -> Optional[Dict]:
+        """Get user by ID, returning dict format"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT id, username, email, bankroll, total_wagered, total_won, 
+                       games_played, games_won, created_at, last_login
+                FROM users WHERE id = ?
+            """, (user_id,))
+            
+            row = cursor.fetchone()
+            if not row:
+                return None
+            
+            conn.close()
+            return {
+                'id': row[0],
+                'username': row[1],
+                'email': row[2],
+                'bankroll': row[3],
+                'total_wagered': row[4],
+                'total_won': row[5],
+                'games_played': row[6],
+                'games_won': row[7],
+                'created_at': row[8],
+                'last_login': row[9]
+            }
+            
+        except Exception:
+            return None
+    
+    def get_user_statistics(self, user_id: int) -> Dict:
+        """Alias for get_user_stats"""
+        return self.get_user_stats(user_id)
+    
+    def get_game_history(self, user_id: int, limit: int = 50) -> List[Dict]:
+        """Get user's game history, returning dict format"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute("""
+                SELECT id, user_id, game_id, bet_amount, final_winnings, 
+                       rounds_completed, result, profit_loss, created_at
+                FROM game_records 
+                WHERE user_id = ? 
+                ORDER BY created_at DESC 
+                LIMIT ?
+            """, (user_id, limit))
+            
+            records = []
+            for row in cursor.fetchall():
+                records.append({
+                    'id': row[0],
+                    'user_id': row[1],
+                    'game_id': row[2],
+                    'bet_amount': row[3],
+                    'final_winnings': row[4],
+                    'rounds_completed': row[5],
+                    'result': row[6],
+                    'profit_loss': row[7],
+                    'created_at': row[8]
+                })
+            
+            conn.close()
+            return records
             
         except Exception:
             return []

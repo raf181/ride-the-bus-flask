@@ -45,20 +45,48 @@ def get_current_user():
         return user_manager.get_user_by_id(session['user_id'])
     return None
 
+def get_current_user_or_guest():
+    """Get current user or create/return guest user."""
+    user = get_current_user()
+    if user:
+        return user, False  # (user, is_guest)
+    
+    # Create or get guest session
+    if 'guest_id' not in session:
+        session['guest_id'] = str(uuid.uuid4())
+        session['guest_bankroll'] = 1000.0  # Starting guest bankroll
+    
+    guest_user = {
+        'id': session['guest_id'],
+        'username': 'Guest',
+        'email': 'guest@casino.com',
+        'bankroll': session.get('guest_bankroll', 1000.0),
+        'total_wagered': 0.0,
+        'total_won': 0.0,
+        'games_played': 0,
+        'games_won': 0,
+        'created_at': 'Guest Session',
+        'last_login': 'Current Session'
+    }
+    
+    return guest_user, True  # (guest_user, is_guest)
+
 
 @app.route('/')
 def landing():
-    """Landing page - redirect to login if not authenticated."""
-    user = get_current_user()
-    if not user:
-        return redirect(url_for('login'))
+    """Landing page - now accessible to both guests and users."""
+    # Use get_current_user_or_guest to handle both logged-in users and guest sessions
+    user, is_guest = get_current_user_or_guest()
     
-    # Check for daily bonus
-    bonus = user_manager.claim_daily_bonus(user['id'])
-    if bonus > 0:
-        flash(f'Daily bonus claimed: ${bonus:.2f}!', 'success')
+    if user and not is_guest:
+        # Check for daily bonus for registered users only
+        bonus = user_manager.claim_daily_bonus(user['id'])
+        if bonus > 0:
+            flash(f'Daily bonus claimed: ${bonus:.2f}!', 'success')
     
-    return render_template('casino_landing.html', user=user)
+    # Show landing page to everyone (guests and registered users)
+    # Note: user might be None for first-time visitors
+    return render_template('casino_landing.html', user=user, is_guest=is_guest)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -129,10 +157,9 @@ def profile():
 
 
 @app.route('/game')
-@login_required
 def game():
-    """Main game interface."""
-    user = get_current_user()
+    """Main game interface - accessible to guests and users."""
+    user, is_guest = get_current_user_or_guest()
     game_id = session.get('game_id')
     
     if not game_id or game_id not in active_games:
@@ -145,14 +172,14 @@ def game():
     return render_template('casino_game.html', 
                          game=game_state, 
                          strategy=strategy,
-                         user=user)
+                         user=user,
+                         is_guest=is_guest)
 
 
 @app.route('/start_game', methods=['POST'])
-@login_required
 def start_game():
-    """Start a new game with specified bet amount."""
-    user = get_current_user()
+    """Start a new game with specified bet amount - accessible to guests and users."""
+    user, is_guest = get_current_user_or_guest()
     bet_amount = float(request.form.get('bet_amount', 10.0))
     
     if bet_amount <= 0:
@@ -163,8 +190,11 @@ def start_game():
         flash('Insufficient funds!', 'error')
         return redirect(url_for('landing'))
     
-    # Deduct bet from user's bankroll
-    user_manager.update_bankroll(user['id'], user['bankroll'] - bet_amount)
+    # Deduct bet from bankroll
+    if is_guest:
+        session['guest_bankroll'] = user['bankroll'] - bet_amount
+    else:
+        user_manager.update_bankroll(user['id'], user['bankroll'] - bet_amount)
     
     engine = CasinoRideTheBus()
     game_state = engine.start_new_game(bet_amount)
@@ -176,10 +206,9 @@ def start_game():
 
 
 @app.route('/make_guess', methods=['POST'])
-@login_required
 def make_guess():
-    """Make a guess for the current round."""
-    user = get_current_user()
+    """Make a guess for the current round - accessible to guests and users."""
+    user, is_guest = get_current_user_or_guest()
     game_id = session.get('game_id')
     
     if not game_id or game_id not in active_games:
@@ -195,25 +224,29 @@ def make_guess():
     try:
         is_correct, card, winnings = engine.make_guess(game_state, guess)
         
-        # If game is finished, record the result
+        # If game is finished, handle results
         if game_state.status.value in ['won', 'lost']:
-            profit_loss = game_state.current_winnings - game_state.initial_bet
-            user_manager.record_game(
-                user_id=user['id'],
-                bet_amount=game_state.initial_bet,
-                final_winnings=game_state.current_winnings,
-                profit_loss=profit_loss,
-                rounds_completed=len(game_state.cards_drawn),
-                cashed_out=(game_state.status.value == 'won')
-            )
-            
-            # Add winnings to user's bankroll
-            if game_state.current_winnings > 0:
-                current_user = user_manager.get_user_by_id(user['id'])
-                user_manager.update_bankroll(
-                    user['id'], 
-                    current_user['bankroll'] + game_state.current_winnings
+            if not is_guest:
+                # Record game for registered users only
+                user_manager.record_game(
+                    user_id=user['id'],
+                    game_id=game_state.game_id,
+                    bet_amount=game_state.bet_amount,
+                    final_winnings=game_state.current_winnings,
+                    rounds_completed=len(game_state.cards_drawn),
+                    result=game_state.status.value
                 )
+            
+            # Add winnings to bankroll
+            if game_state.current_winnings > 0:
+                if is_guest:
+                    session['guest_bankroll'] = session.get('guest_bankroll', 1000.0) + game_state.current_winnings
+                else:
+                    current_user = user_manager.get_user_by_id(user['id'])
+                    user_manager.update_bankroll(
+                        user['id'], 
+                        current_user['bankroll'] + game_state.current_winnings
+                    )
         
         return jsonify({
             'success': True,
@@ -232,10 +265,9 @@ def make_guess():
 
 
 @app.route('/cash_out', methods=['POST'])
-@login_required
 def cash_out():
-    """Cash out current winnings."""
-    user = get_current_user()
+    """Cash out current winnings - accessible to guests and users."""
+    user, is_guest = get_current_user_or_guest()
     game_id = session.get('game_id')
     
     if not game_id or game_id not in active_games:
@@ -247,20 +279,23 @@ def cash_out():
     try:
         winnings = engine.cash_out(game_state)
         
-        # Record the game
-        profit_loss = winnings - game_state.initial_bet
-        user_manager.record_game(
-            user_id=user['id'],
-            bet_amount=game_state.initial_bet,
-            final_winnings=winnings,
-            profit_loss=profit_loss,
-            rounds_completed=len(game_state.cards_drawn),
-            cashed_out=True
-        )
+        # Record the game for registered users only
+        if not is_guest:
+            user_manager.record_game(
+                user_id=user['id'],
+                game_id=game_state.game_id,
+                bet_amount=game_state.bet_amount,
+                final_winnings=winnings,
+                rounds_completed=len(game_state.cards_drawn),
+                result='cashed_out'
+            )
         
-        # Add winnings to user's bankroll
-        current_user = user_manager.get_user_by_id(user['id'])
-        user_manager.update_bankroll(user['id'], current_user['bankroll'] + winnings)
+        # Add winnings to bankroll
+        if is_guest:
+            session['guest_bankroll'] = session.get('guest_bankroll', 1000.0) + winnings
+        else:
+            current_user = user_manager.get_user_by_id(user['id'])
+            user_manager.update_bankroll(user['id'], current_user['bankroll'] + winnings)
         
         return jsonify({
             'success': True,
@@ -272,17 +307,15 @@ def cash_out():
 
 
 @app.route('/new_game', methods=['POST'])
-@login_required
 def new_game():
-    """Start a fresh game (clear session)."""
+    """Start a fresh game (clear session) - accessible to guests and users."""
     session.pop('game_id', None)
     return redirect(url_for('landing'))
 
 
 @app.route('/strategy')
-@login_required
 def get_strategy():
-    """Get strategy recommendation for current game state."""
+    """Get strategy recommendation for current game state - accessible to guests and users."""
     game_id = session.get('game_id')
     if not game_id or game_id not in active_games:
         return jsonify({'error': 'No active game'}), 400
@@ -300,10 +333,25 @@ def get_strategy():
     })
 
 
+@app.route('/play_as_guest', methods=['POST'])
+def play_as_guest():
+    """Start a guest session."""
+    # Clear any existing user session
+    session.pop('user_id', None)
+    session.pop('username', None)
+    
+    # Initialize guest session
+    session['guest_id'] = str(uuid.uuid4())
+    session['guest_bankroll'] = 1000.0
+    
+    flash('Playing as guest! You start with $1000. Register to save your progress.', 'info')
+    return redirect(url_for('landing'))
+
+
 @app.route('/add_funds', methods=['POST'])
 @login_required
 def add_funds():
-    """Add funds to user account (demo purposes)."""
+    """Add funds to user account (demo purposes) - only for registered users."""
     user = get_current_user()
     amount = float(request.form.get('amount', 0))
     

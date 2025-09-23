@@ -372,11 +372,26 @@
     <div class="header">
         <h1>🎰 CASINO RIDE THE BUS</h1>
         <div class="user-info">
-            <div class="bankroll">💰 ${{ "%.2f"|format(user.bankroll) }}</div>
-            <div class="user-controls">
-                <a href="{{ url_for('profile') }}" class="btn btn-secondary btn-small">Profile</a>
-                <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-small">Logout</a>
-            </div>
+            {% if user %}
+                <div class="bankroll">💰 ${{ "%.2f"|format(user.bankroll) }}</div>
+                <div class="user-controls">
+                    {% if user.username != 'Guest' %}
+                        <a href="{{ url_for('profile') }}" class="btn btn-secondary btn-small">Profile</a>
+                        <a href="{{ url_for('logout') }}" class="btn btn-secondary btn-small">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('register') }}" class="btn btn-secondary btn-small">Sign Up</a>
+                        <a href="{{ url_for('login') }}" class="btn btn-secondary btn-small">Login</a>
+                    {% endif %}
+                </div>
+            {% else %}
+                <div class="user-controls">
+                    <form action="{{ url_for('play_as_guest') }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-secondary btn-small">Play as Guest</button>
+                    </form>
+                    <a href="{{ url_for('register') }}" class="btn btn-secondary btn-small">Sign Up</a>
+                    <a href="{{ url_for('login') }}" class="btn btn-secondary btn-small">Login</a>
+                </div>
+            {% endif %}
         </div>
     </div>
 
@@ -389,6 +404,12 @@
                 <p style="margin-bottom: 15px;">
                     Casino Ride the Bus is a 4-round card guessing game where you must correctly predict aspects of each drawn card to advance. Each round has different multipliers and increasing difficulty!
                 </p>
+                {% if not user %}
+                    <p style="margin-bottom: 15px; color: #6bcf7f;">
+                        <strong>New to the casino?</strong> Click "Play as Guest" to start with $1000 and try the game for free! 
+                        Register later to save your progress and join the leaderboard.
+                    </p>
+                {% endif %}
                 <p>
                     <strong style="color: #ffd700;">Strategy Tip:</strong> Use our AI-powered strategy advisor to maximize your chances of winning!
                 </p>
@@ -424,6 +445,7 @@
                 </div>
             </div>
 
+            {% if user %}
             <div class="betting-section">
                 <h3 class="betting-title">💎 Place Your Bet</h3>
                 
@@ -440,28 +462,53 @@
                         <span class="quick-bet" onclick="setBet(25)">$25</span>
                         <span class="quick-bet" onclick="setBet(50)">$50</span>
                         <span class="quick-bet" onclick="setBet(100)">$100</span>
-                        <span class="quick-bet" onclick="setBet({{ user.bankroll }})">All In</span>
+                        <span class="quick-bet" onclick="setBet({{ user.bankroll|int }})">All In</span>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">🎰 Start Game</button>
                 </form>
             </div>
+            {% else %}
+            <div class="betting-section">
+                <h3 class="betting-title">🎮 Get Started</h3>
+                <p style="text-align: center; margin-bottom: 20px;">Choose how you want to play:</p>
+                
+                <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                    <form action="{{ url_for('play_as_guest') }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">🎲 Play as Guest</button>
+                    </form>
+                    <a href="{{ url_for('register') }}" class="btn btn-secondary">📝 Create Account</a>
+                </div>
+                
+                <p style="font-size: 14px; text-align: center; margin-top: 15px; color: #ccc;">
+                    Guest play starts with $1000. Register to save progress and access full features!
+                </p>
+            </div>
+            {% endif %}
         </div>
 
         <div class="sidebar">
+            {% if user %}
             <!-- Account Management -->
             <div class="sidebar-card">
                 <h3 style="color: #ffd700; margin-bottom: 15px;">💳 Account</h3>
                 <p style="margin-bottom: 15px;">Welcome, <strong>{{ user.username }}</strong>!</p>
                 <p style="margin-bottom: 15px;">Current Balance: <span style="color: #ffd700; font-weight: 700;">${{ "%.2f"|format(user.bankroll) }}</span></p>
                 
+                {% if user.username != 'Guest' %}
                 <form action="{{ url_for('add_funds') }}" method="POST" class="add-funds-form">
                     <input type="number" name="amount" class="add-funds-input" 
                            placeholder="Amount" min="1" max="1000" step="0.01">
                     <button type="submit" class="btn btn-secondary btn-small">Add Funds</button>
                 </form>
                 <p style="font-size: 12px; color: #ccc; margin-top: 8px;">Max $1000 per transaction</p>
+                {% else %}
+                <p style="font-size: 14px; color: #ccc; margin-top: 8px;">
+                    👆 Playing as guest! <a href="{{ url_for('register') }}" style="color: #ffd700;">Register</a> to save progress.
+                </p>
+                {% endif %}
             </div>
+            {% endif %}
 
             <!-- Game Rules -->
             <div class="sidebar-card">
@@ -475,6 +522,7 @@
                 </ul>
             </div>
 
+            {% if user and user.username != 'Guest' %}
             <!-- Statistics -->
             <div class="sidebar-card">
                 <h3 style="color: #ffd700; margin-bottom: 15px;">📊 Quick Stats</h3>
@@ -489,23 +537,36 @@
                     </div>
                     <div style="display: flex; justify-content: space-between;">
                         <span>Total Winnings:</span>
-                        <span style="color: #ffd700;">${{ "%.2f"|format(user.total_winnings or 0) }}</span>
+                        <span style="color: #ffd700;">${{ "%.2f"|format(user.total_won or 0) }}</span>
                     </div>
                 </div>
             </div>
+            {% elif not user %}
+            <!-- Welcome Message -->
+            <div class="sidebar-card">
+                <h3 style="color: #ffd700; margin-bottom: 15px;">🎉 Welcome!</h3>
+                <p style="margin-bottom: 15px;">Ready to ride the bus? Choose your way to play:</p>
+                <ul style="list-style: none; padding: 0; margin-bottom: 15px;">
+                    <li style="margin-bottom: 8px;">🎲 <strong>Guest Play:</strong> Quick start with $1000</li>
+                    <li style="margin-bottom: 8px;">📊 <strong>Account:</strong> Track stats & progress</li>
+                    <li style="margin-bottom: 8px;">🏆 <strong>Leaderboard:</strong> Compete with others</li>
+                </ul>
+            </div>
+            {% endif %}
         </div>
     </div>
 
     <script>
+        {% if user %}
         function setBet(amount) {
-            const maxBet = {{ user.bankroll }};
+            const maxBet = {{ user.bankroll|int }};
             const betAmount = Math.min(amount, maxBet);
             document.getElementById('bet_amount').value = betAmount;
         }
 
         // Validate bet amount
         document.getElementById('bet_amount').addEventListener('input', function() {
-            const maxBet = {{ user.bankroll }};
+            const maxBet = {{ user.bankroll|int }};
             const value = parseFloat(this.value) || 0;
             
             if (value > maxBet) {
@@ -514,6 +575,7 @@
                 this.value = 0;
             }
         });
+        {% endif %}
 
         // Add some interactive effects
         document.addEventListener('DOMContentLoaded', function() {

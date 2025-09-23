@@ -9,7 +9,7 @@ Casino Ride the Bus is a 4-round betting game where you guess card attributes. E
 ### Game Rules
 
 1. **Round 1**: Red or Black? (2x multiplier)
-2. **Round 2**: Higher or Lower than first card? (2x multiplier) 
+2. **Round 2**: Higher or Lower than first card? (2x multiplier)
 3. **Round 3**: Inside or Outside the range of first two cards? (3x multiplier)
 4. **Round 4**: Pick the suit (must not be on board)? (4x multiplier)
 
@@ -20,20 +20,24 @@ Casino Ride the Bus is a 4-round betting game where you guess card attributes. E
 The game includes a built-in strategy advisor based on statistical analysis:
 
 ### Round 1 Strategy
+
 - Pick either color consistently (50/50 odds)
 
 ### Round 2 Strategy  
+
 - **Cards 2-5**: Pick HIGHER (good odds)
 - **Cards 6-10**: CASH OUT (danger zone - poor odds)
 - **Cards J-A**: Pick LOWER (good odds)
 
 ### Round 3 Strategy
+
 - **Pair/Connected cards**: Pick OUTSIDE (very high chance)
 - **1-2 card gap**: Pick OUTSIDE (high chance)
 - **3-8 card gap**: CASH OUT (danger zone)
 - **9+ card gap**: Pick INSIDE (good odds due to large range)
 
 ### Round 4 Strategy
+
 - Pick any suit NOT shown in the first 3 cards
 - If all suits are used, you should have cashed out earlier!
 
@@ -75,11 +79,13 @@ final_winnings = engine.cash_out(game)
 ## 🎮 How to Play
 
 ### Setup
+
 1. Install Flask: `pip install flask`
 2. Run the app: `python app.py`
 3. Open `http://localhost:5000`
 
 ### Gameplay
+
 1. **Place Bet**: Choose amount ($1-$1000)
 2. **Round 1**: Click RED or BLACK
 3. **Follow Strategy**: Use the built-in advisor
@@ -87,6 +93,7 @@ final_winnings = engine.cash_out(game)
 5. **Risk vs Reward**: Go for the 64x jackpot or play it safe
 
 ### Keyboard Shortcuts
+
 - **Round 1**: R (Red), B (Black)
 - **Round 2**: H (Higher), L (Lower)  
 - **Round 3**: I (Inside), O (Outside)
@@ -110,6 +117,7 @@ python test_casino.py
 ```
 
 Tests include:
+
 - ✅ Full game simulation with strategy
 - ✅ Strategy recommendation accuracy  
 - ✅ Statistical probability validation

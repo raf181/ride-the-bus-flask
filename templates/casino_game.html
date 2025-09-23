@@ -61,10 +61,17 @@
                     </div>
                     <div class="text-right">
                         <div class="text-green-400 font-bold">Bankroll: ${{ "%.2f"|format(user.bankroll) }}</div>
-                        <div class="text-gray-300">Player: {{ user.username }}</div>
+                        <div class="text-gray-300">Player: {{ user.username }}{% if is_guest %} (Guest){% endif %}</div>
+                        {% if is_guest %}
+                        <div class="text-yellow-400 text-xs mt-1">
+                            🎲 <a href="{{ url_for('register') }}" class="text-yellow-300 underline">Register</a> to save progress
+                        </div>
+                        {% endif %}
                     </div>
                     <div class="flex space-x-2">
+                        {% if not is_guest %}
                         <a href="{{ url_for('profile') }}" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded text-sm">Profile</a>
+                        {% endif %}
                         <a href="{{ url_for('new_game') }}" class="bg-gray-600 hover:bg-gray-500 text-white px-3 py-1 rounded text-sm">Exit</a>
                     </div>
                 </div>
@@ -374,7 +381,7 @@
         
         // Add keyboard shortcuts
         document.addEventListener('keydown', function(e) {
-            if ({{ game.status.value == 'active' }}|lower) {
+            if ({{ 'true' if game.status.value == 'active' else 'false' }}) {
                 {% if game.current_round.value == 1 %}
                 if (e.key === '1' || e.key.toLowerCase() === 'r') makeGuess('red');
                 if (e.key === '2' || e.key.toLowerCase() === 'b') makeGuess('black');
