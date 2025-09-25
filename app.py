@@ -10,7 +10,6 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from flask import Flask, render_template, request, session, redirect, url_for, jsonify, flash
 import uuid
-import time
 from typing import Dict, Optional
 from functools import wraps
 

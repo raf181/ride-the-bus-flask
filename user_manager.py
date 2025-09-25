@@ -287,7 +287,7 @@ class UserManager:
             return True
             
         except Exception as e:
-            print(f"Error recording game: {e}")
+            # Log error silently - could use proper logging in production
             return False
     
     def get_user_game_history(self, user_id: int, limit: int = 50) -> List[GameRecord]:

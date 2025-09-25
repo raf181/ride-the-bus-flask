@@ -256,7 +256,7 @@ class RideTheBusGame {
         
         const soundName = sounds[action];
         if (soundName) {
-            console.log(`Playing sound: ${soundName}`);
+            // In a full implementation, you'd load and play audio files
             // this.audioManager.play(soundName);
         }
     }
