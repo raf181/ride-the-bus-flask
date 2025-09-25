@@ -183,35 +183,23 @@
                     </p>
                     
                     {% elif game.current_round.value == 4 %}
-                    <!-- Round 4: Pick Suit -->
-                    {% set used_suits = game.cards_drawn[:3]|map(attribute='suit.name')|map('lower')|list %}
+                    <!-- Round 4: Pick Suit - All 4 suits available -->
                     <div class="grid grid-cols-2 gap-4">
-                        {% if 'hearts' not in used_suits %}
                         <button onclick="makeGuess('hearts')" class="bg-red-600 hover:bg-red-500 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
                             ♥️ HEARTS
                         </button>
-                        {% endif %}
-                        {% if 'diamonds' not in used_suits %}
                         <button onclick="makeGuess('diamonds')" class="bg-red-600 hover:bg-red-500 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
                             ♦️ DIAMONDS
                         </button>
-                        {% endif %}
-                        {% if 'clubs' not in used_suits %}
                         <button onclick="makeGuess('clubs')" class="bg-gray-800 hover:bg-gray-700 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
                             ♣️ CLUBS
                         </button>
-                        {% endif %}
-                        {% if 'spades' not in used_suits %}
                         <button onclick="makeGuess('spades')" class="bg-gray-800 hover:bg-gray-700 text-white py-4 px-6 rounded-lg font-bold text-xl transition">
                             ♠️ SPADES
                         </button>
-                        {% endif %}
                     </div>
                     <p class="text-center text-gray-400 mt-2">
-                        Used suits: 
-                        {% for card in game.cards_drawn[:3] %}
-                        {{ card.suit.value }}
-                        {% endfor %}
+                        Choose any suit - each has a 25% chance!
                     </p>
                     {% endif %}
                     

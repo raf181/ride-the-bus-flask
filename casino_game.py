@@ -232,15 +232,12 @@ class CasinoRideTheBus:
         return False
     
     def _check_round4(self, guess: str, card: Card, previous_cards: List[Card]) -> bool:
-        """Round 4: Guess the suit (must not be on the board)"""
-        # Get suits already on the board
-        used_suits = {c.suit.name.lower() for c in previous_cards[:3]}
-        
-        # Check if guessed suit matches the card and isn't already used
+        """Round 4: Guess the suit - can choose from any of the 4 suits"""
+        # Check if guessed suit matches the card
         guessed_suit = guess.lower()
         card_suit = card.suit.name.lower()
         
-        return guessed_suit == card_suit and card_suit not in used_suits
+        return guessed_suit == card_suit
     
     def get_strategy_recommendation(self, game: GameState) -> StrategyRecommendation:
         """Get optimal strategy recommendation based on current game state"""
@@ -348,25 +345,15 @@ class CasinoRideTheBus:
             )
     
     def _strategy_round4(self, previous_cards: List[Card]) -> StrategyRecommendation:
-        """Round 4 strategy: pick suit not on board"""
-        used_suits = {card.suit for card in previous_cards}
-        available_suits = [suit for suit in Suit if suit not in used_suits]
+        """Round 4 strategy: pick any suit (25% chance each)"""
+        # All 4 suits are available to choose from
+        prob = 1.0 / 4  # 25% chance
         
-        if available_suits:
-            prob = 1.0 / len(available_suits)
-            suit_name = available_suits[0].name.lower()
-            return StrategyRecommendation(
-                action=f"pick_{suit_name}",
-                confidence=0.7,
-                reasoning=f"Pick {suit_name} (not on board). {prob:.1%} chance.",
-                expected_value=prob * 4.0,
-                probability=prob
-            )
-        else:
-            return StrategyRecommendation(
-                action="cash_out",
-                confidence=1.0,
-                reasoning="All suits are on board. Impossible to win.",
-                expected_value=3.0,
-                probability=0.0
-            )
+        # Recommend hearts as default (could be any suit)
+        return StrategyRecommendation(
+            action="pick_hearts",
+            confidence=0.6,
+            reasoning="Pick any suit. Each has a 25% chance of being correct.",
+            expected_value=prob * 4.0,
+            probability=prob
+        )
